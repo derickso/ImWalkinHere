@@ -19,7 +19,7 @@ namespace Events
 		MenuOpenCloseEventHandler() = default;
 		MenuOpenCloseEventHandler(const MenuOpenCloseEventHandler&) = delete;
 		MenuOpenCloseEventHandler(MenuOpenCloseEventHandler&&) = delete;
-		~MenuOpenCloseEventHandler() = default;
+		virtual ~MenuOpenCloseEventHandler() = default;
 
 		MenuOpenCloseEventHandler& operator=(const MenuOpenCloseEventHandler&) = delete;
 		MenuOpenCloseEventHandler& operator=(MenuOpenCloseEventHandler&&) = delete;

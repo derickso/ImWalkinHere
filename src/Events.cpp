@@ -21,12 +21,12 @@ namespace Events
 			auto task = SKSE::GetTaskInterface();
 			task->AddTask([isOpening]()
 			{
-			auto player = RE::PlayerCharacter::GetSingleton();
-			if (isOpening) {
-				player->SetCollision(false);
-			} else {
-				player->SetCollision(true);
-			}
+				auto player = RE::PlayerCharacter::GetSingleton();
+				if (isOpening) {
+					player->SetCollision(false);
+				} else {
+					player->SetCollision(true);
+				}
 			});
 		}
 

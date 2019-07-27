@@ -1,4 +1,4 @@
-# A Closer Look SSE
+# I'm Walkin' Here
 
 ## Build Dependencies
 * [SKSE64](https://skse.silverlock.org/)
