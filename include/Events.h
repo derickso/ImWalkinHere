@@ -5,26 +5,27 @@
 
 namespace Events
 {
-	class MenuOpenCloseEventHandler : public RE::BSTEventSink<RE::MenuOpenCloseEvent>
+	class MenuOpenCloseHandler : public RE::BSTEventSink<RE::MenuOpenCloseEvent>
 	{
 	public:
-		using EventResult = RE::EventResult;
+		using EventResult = RE::BSEventNotifyControl;
 
 
-		static MenuOpenCloseEventHandler* GetSingleton();
+		static MenuOpenCloseHandler* GetSingleton();
+		static void Install();
 
-		virtual	EventResult ReceiveEvent(RE::MenuOpenCloseEvent* a_event, RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) override;
+		virtual	EventResult ProcessEvent(const RE::MenuOpenCloseEvent* a_event, RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) override;
 
 	private:
-		MenuOpenCloseEventHandler() = default;
-		MenuOpenCloseEventHandler(const MenuOpenCloseEventHandler&) = delete;
-		MenuOpenCloseEventHandler(MenuOpenCloseEventHandler&&) = delete;
-		virtual ~MenuOpenCloseEventHandler() = default;
+		MenuOpenCloseHandler() = default;
+		MenuOpenCloseHandler(const MenuOpenCloseHandler&) = delete;
+		MenuOpenCloseHandler(MenuOpenCloseHandler&&) = delete;
+		virtual ~MenuOpenCloseHandler() = default;
 
-		MenuOpenCloseEventHandler& operator=(const MenuOpenCloseEventHandler&) = delete;
-		MenuOpenCloseEventHandler& operator=(MenuOpenCloseEventHandler&&) = delete;
+		MenuOpenCloseHandler& operator=(const MenuOpenCloseHandler&) = delete;
+		MenuOpenCloseHandler& operator=(MenuOpenCloseHandler&&) = delete;
 	};
 
 
-	void SinkEventHandlers();
+	void Install();
 }

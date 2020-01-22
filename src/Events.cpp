@@ -2,42 +2,41 @@
 
 #include "SKSE/API.h"
 
+#include "CollisionHandler.h"
+
 
 namespace Events
 {
-	MenuOpenCloseEventHandler* MenuOpenCloseEventHandler::GetSingleton()
+	MenuOpenCloseHandler* MenuOpenCloseHandler::GetSingleton()
 	{
-		static MenuOpenCloseEventHandler singleton;
+		static MenuOpenCloseHandler singleton;
 		return &singleton;
 	}
 
 
-	auto MenuOpenCloseEventHandler::ReceiveEvent(RE::MenuOpenCloseEvent* a_event, RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource)
+	void MenuOpenCloseHandler::Install()
+	{
+		auto ui = RE::UI::GetSingleton();
+		ui->AddEventSink(MenuOpenCloseHandler::GetSingleton());
+		_MESSAGE("Added menu open/close event sink");
+	}
+
+
+	auto MenuOpenCloseHandler::ProcessEvent(const RE::MenuOpenCloseEvent* a_event, RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource)
 		-> EventResult
 	{
-		auto uiStrHolder = RE::UIStringHolder::GetSingleton();
-		if (a_event->menuName == uiStrHolder->dialogueMenu) {
-			auto isOpening = a_event->isOpening;
-			auto task = SKSE::GetTaskInterface();
-			task->AddTask([isOpening]()
-			{
-				auto player = RE::PlayerCharacter::GetSingleton();
-				if (isOpening) {
-					player->SetCollision(false);
-				} else {
-					player->SetCollision(true);
-				}
-			});
+		auto intfcStr = RE::InterfaceStrings::GetSingleton();
+		if (a_event->menuName == intfcStr->dialogueMenu) {
+			CollisionHandler::SetInDialogue(a_event->opening);
 		}
 
 		return EventResult::kContinue;
 	}
 
 
-	void SinkEventHandlers()
+	void Install()
 	{
-		auto mm = RE::MenuManager::GetSingleton();
-		mm->AddEventSink(MenuOpenCloseEventHandler::GetSingleton());
-		_MESSAGE("Added menu open/close event sink");
+		MenuOpenCloseHandler::Install();
+		_MESSAGE("Installed all event handlers");
 	}
 }

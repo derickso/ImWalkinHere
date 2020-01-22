@@ -152,11 +152,15 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\CollisionHandler.cpp" />
     <ClCompile Include="src\Events.cpp" />
+    <ClCompile Include="src\Hooks.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\CollisionHandler.h" />
     <ClInclude Include="include\Events.h" />
+    <ClInclude Include="include\Hooks.h" />
     <ClInclude Include="include\version.h" />
   </ItemGroup>
   <ItemGroup>

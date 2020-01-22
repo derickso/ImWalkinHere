@@ -1,5 +1,6 @@
 ﻿#include "skse64_common/skse_version.h"
 
+#include "Hooks.h"
 #include "Events.h"
 #include "version.h"
 
@@ -12,7 +13,7 @@ namespace
 	{
 		switch (a_msg->type) {
 		case SKSE::MessagingInterface::kDataLoaded:
-			Events::SinkEventHandlers();
+			Events::Install();
 			break;
 		}
 	}
@@ -26,6 +27,7 @@ extern "C" {
 		SKSE::Logger::SetPrintLevel(SKSE::Logger::Level::kDebugMessage);
 		SKSE::Logger::SetFlushLevel(SKSE::Logger::Level::kDebugMessage);
 		SKSE::Logger::UseLogStamp(true);
+		SKSE::Logger::TrackTrampolineStats(true);
 
 		_MESSAGE("ImWalkinHere v%s", WLKN_VERSION_VERSTRING);
 
@@ -39,11 +41,10 @@ extern "C" {
 		}
 
 		switch (a_skse->RuntimeVersion()) {
-		case RUNTIME_VERSION_1_5_73:
-		case RUNTIME_VERSION_1_5_80:
+		case RUNTIME_VERSION_1_5_97:
 			break;
 		default:
-			_FATALERROR("Unsupported runtime version %08X!\n", a_skse->RuntimeVersion());
+			_FATALERROR("Unsupported runtime version %s!\n", a_skse->UnmangledRuntimeVersion().c_str());
 			return false;
 		}
 
@@ -59,13 +60,16 @@ extern "C" {
 			return false;
 		}
 
-		auto messaging = SKSE::GetMessagingInterface();
-		if (messaging->RegisterListener("SKSE", MessageHandler)) {
-			_MESSAGE("Messaging interface registration successful");
-		} else {
-			_FATALERROR("Messaging interface registration failed!\n");
+		if (!SKSE::AllocTrampoline(1 << 5)) {
 			return false;
 		}
+
+		auto messaging = SKSE::GetMessagingInterface();
+		if (!messaging->RegisterListener("SKSE", MessageHandler)) {
+			return false;
+		}
+
+		Hooks::Install();
 
 		return true;
 	}
