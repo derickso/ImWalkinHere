@@ -2,6 +2,7 @@
 
 #include "Hooks.h"
 #include "Events.h"
+#include "Settings.h"
 #include "version.h"
 
 #include "SKSE/API.h"
@@ -60,7 +61,12 @@ extern "C" {
 			return false;
 		}
 
-		if (!SKSE::AllocTrampoline(1 << 5)) {
+		if (!Settings::loadSettings()) {
+			_FATALERROR("Failed to load settings!");
+			return false;
+		}
+
+		if (!SKSE::AllocTrampoline(1 << 4)) {
 			return false;
 		}
 

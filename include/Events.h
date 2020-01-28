@@ -1,5 +1,7 @@
 #pragma once
 
+#include <atomic>
+
 #include "RE/Skyrim.h"
 
 
@@ -16,6 +18,8 @@ namespace Events
 
 		virtual	EventResult ProcessEvent(const RE::MenuOpenCloseEvent* a_event, RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) override;
 
+		bool IsInDialogue() const;
+
 	private:
 		MenuOpenCloseHandler() = default;
 		MenuOpenCloseHandler(const MenuOpenCloseHandler&) = delete;
@@ -24,6 +28,9 @@ namespace Events
 
 		MenuOpenCloseHandler& operator=(const MenuOpenCloseHandler&) = delete;
 		MenuOpenCloseHandler& operator=(MenuOpenCloseHandler&&) = delete;
+
+
+		std::atomic_bool _inDialogue;
 	};
 
 

@@ -3,9 +3,65 @@
 #include "SKSE/API.h"
 #include "SKSE/Trampoline.h"
 
+#include "Events.h"
+#include "Settings.h"
+
+
+namespace
+{
+	constexpr auto COLLISION_FLAG = static_cast<UInt32>(RE::CFilter::Flag::kNoCollision);
+}
+
+
+void ICollider::PreCollide(RE::Actor* a_actor)
+{
+	if (ShouldIgnoreCollision(a_actor)) {
+		SetCollisionObject(a_actor);
+		SetCollisionOnObject(false);
+	}
+}
+
+
+void ICollider::PostCollide()
+{
+	if (_collisionObj) {
+		SetCollisionOnObject(true);
+		ClearCollisionObject();
+	}
+}
+
+
+void ICollider::SetCollisionObject(RE::Actor* a_actor)
+{
+	auto controller = a_actor->GetCharController();
+	_collisionObj = controller->bumpedCharCollisionObject;
+}
+
+
+void ICollider::ClearCollisionObject()
+{
+	_collisionObj.reset();
+}
+
+
+void ICollider::SetCollisionOnObject(bool a_set)
+{
+	auto& filter = _collisionObj->collidable.broadPhaseHandle.collisionFilterInfo;
+	if (!a_set) {
+		filter |= COLLISION_FLAG;
+	} else {
+		filter &= ~COLLISION_FLAG;
+	}
+}
+
 
 void CollisionHandler::Install()
 {
+	if (!Init()) {
+		_ERROR("%s did not have any collision handlers", typeid(CollisionHandler).name());
+		return;
+	}
+
 	// E8 ? ? ? ? 48 8B 06 48 8B CE FF 90 ? ? ? ? 8B 86 ? ? ? ?
 	constexpr std::uintptr_t FUNC_ADDR = 0x005D8170;	// 1_5_97
 	REL::Offset<std::uintptr_t> funcBase(FUNC_ADDR);
@@ -17,23 +73,31 @@ void CollisionHandler::Install()
 }
 
 
-void CollisionHandler::SetInDialogue(bool a_inDialogue)
+bool CollisionHandler::Init()
 {
-	_inDialogue = a_inDialogue;
+	if (Settings::disableDialogueCollision) {
+		_colliders.push_back(std::make_unique<DialogueCollider>());
+	}
+
+	if (Settings::disableAllyCollision) {
+		_colliders.push_back(std::make_unique<AllyCollider>());
+	}
+
+	return !_colliders.empty();
 }
 
 
-void CollisionHandler::Hook_ApplyMovementDelta(RE::Actor* a_this, float a_delta)
+void CollisionHandler::Hook_ApplyMovementDelta(RE::Actor* a_actor, float a_delta)
 {
-	if (!TryProcess(a_this, a_delta)) {
-		_ApplyMovementDelta(a_this, a_delta);
+	if (!CanProcess(a_actor, a_delta)) {
+		_ApplyMovementDelta(a_actor, a_delta);
 	}
 }
 
 
-bool CollisionHandler::TryProcess(RE::Actor* a_actor, float a_delta)
+bool CollisionHandler::CanProcess(RE::Actor* a_actor, float a_delta)
 {
-	if (!_inDialogue || !a_actor->IsPlayerRef()) {
+	if (!a_actor->IsPlayerRef()) {
 		return false;
 	}
 
@@ -52,31 +116,59 @@ bool CollisionHandler::TryProcess(RE::Actor* a_actor, float a_delta)
 		return false;
 	}
 
-	ClearCollision(controller);
+	PreCollide(a_actor);
 
 	_ApplyMovementDelta(a_actor, a_delta);
 
-	RestoreCollision(controller);
+	PostCollide(a_actor);
 
 	return true;
 }
 
 
-void CollisionHandler::ClearCollision(RE::bhkCharacterController* a_controller)
+void CollisionHandler::PreCollide(RE::Actor* a_actor)
 {
-	_collisionObj = a_controller->bumpedCharCollisionObject;
-	auto& filter = _collisionObj->collidable.broadPhaseHandle.collisionFilterInfo;
-	filter |= COLLISION_FLAG;
+	for (auto& collider : _colliders) {
+		collider->PreCollide(a_actor);
+	}
 }
 
 
-void CollisionHandler::RestoreCollision(RE::bhkCharacterController* a_controller)
+void CollisionHandler::PostCollide(RE::Actor* a_actor)
 {
-	auto& filter = _collisionObj->collidable.broadPhaseHandle.collisionFilterInfo;
-	filter &= ~COLLISION_FLAG;
-	_collisionObj.reset();
+	for (auto& collider : _colliders) {
+		collider->PostCollide();
+	}
 }
 
 
-decltype(CollisionHandler::_inDialogue) CollisionHandler::_inDialogue = false;
-decltype(CollisionHandler::_collisionObj) CollisionHandler::_collisionObj;
+decltype(CollisionHandler::_colliders) CollisionHandler::_colliders;
+
+
+bool DialogueCollider::ShouldIgnoreCollision(RE::Actor* a_actor)
+{
+	auto menuHandler = Events::MenuOpenCloseHandler::GetSingleton();
+	return menuHandler->IsInDialogue();
+}
+
+
+bool AllyCollider::ShouldIgnoreCollision(RE::Actor* a_actor)
+{
+	auto controller = a_actor->GetCharController();
+	auto collisionObj = controller->bumpedCharCollisionObject.get();
+	auto colRef = RE::TESHavokUtilities::FindCollidableRef(collisionObj->collidable);
+	if (!colRef) {
+		return false;
+	}
+
+	if (colRef->IsNot(RE::FormType::ActorCharacter)) {
+		return false;
+	}
+
+	auto colActor = static_cast<RE::Actor*>(colRef);
+	if (!colActor->IsPlayerTeammate()) {
+		return false;
+	}
+
+	return true;
+}

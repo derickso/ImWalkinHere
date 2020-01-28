@@ -2,8 +2,6 @@
 
 #include "SKSE/API.h"
 
-#include "CollisionHandler.h"
-
 
 namespace Events
 {
@@ -27,10 +25,16 @@ namespace Events
 	{
 		auto intfcStr = RE::InterfaceStrings::GetSingleton();
 		if (a_event->menuName == intfcStr->dialogueMenu) {
-			CollisionHandler::SetInDialogue(a_event->opening);
+			_inDialogue = a_event->opening;
 		}
 
 		return EventResult::kContinue;
+	}
+
+
+	bool MenuOpenCloseHandler::IsInDialogue() const
+	{
+		return _inDialogue;
 	}
 
 
