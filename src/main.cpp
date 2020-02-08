@@ -61,7 +61,7 @@ extern "C" {
 			return false;
 		}
 
-		if (!Settings::loadSettings()) {
+		if (!Settings::LoadSettings()) {
 			_FATALERROR("Failed to load settings!");
 			return false;
 		}

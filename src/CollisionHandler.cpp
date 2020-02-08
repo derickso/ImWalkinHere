@@ -75,11 +75,11 @@ void CollisionHandler::Install()
 
 bool CollisionHandler::Init()
 {
-	if (Settings::disableDialogueCollision) {
+	if (*Settings::disableDialogueCollision) {
 		_colliders.push_back(std::make_unique<DialogueCollider>());
 	}
 
-	if (Settings::disableAllyCollision) {
+	if (*Settings::disableAllyCollision) {
 		_colliders.push_back(std::make_unique<AllyCollider>());
 	}
 

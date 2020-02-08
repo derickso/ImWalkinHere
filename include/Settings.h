@@ -3,11 +3,15 @@
 #include "Json2Settings.h"
 
 
-class Settings : public Json2Settings::Settings
+class Settings
 {
 public:
+	using bSetting = Json2Settings::bSetting;
+
+
 	Settings() = delete;
-	static bool loadSettings(bool a_dumpParse = false);
+
+	static bool LoadSettings(bool a_dumpParse = false);
 
 
 	static bSetting disableDialogueCollision;

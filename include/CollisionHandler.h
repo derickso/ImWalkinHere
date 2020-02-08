@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "RE/Skyrim.h"
+#include "REL/Relocation.h"
 
 
 class ICollider
@@ -41,9 +42,9 @@ private:
 	static void PreCollide(RE::Actor* a_actor);
 	static void PostCollide(RE::Actor* a_actor);
 
-	using ApplyMovementDelta_t = function_type_t<decltype(&CollisionHandler::Hook_ApplyMovementDelta)>;
+	using ApplyMovementDelta_t = decltype(&CollisionHandler::Hook_ApplyMovementDelta);
 
-	static inline ApplyMovementDelta_t* _ApplyMovementDelta = 0;
+	static inline REL::Function<ApplyMovementDelta_t> _ApplyMovementDelta;
 	static std::vector<std::unique_ptr<ICollider>> _colliders;
 };
 
