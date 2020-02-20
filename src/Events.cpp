@@ -20,7 +20,7 @@ namespace Events
 	}
 
 
-	auto MenuOpenCloseHandler::ProcessEvent(const RE::MenuOpenCloseEvent* a_event, RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource)
+	auto MenuOpenCloseHandler::ProcessEvent(const RE::MenuOpenCloseEvent* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource)
 		-> EventResult
 	{
 		auto intfcStr = RE::InterfaceStrings::GetSingleton();

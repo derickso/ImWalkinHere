@@ -134,7 +134,7 @@ void CollisionHandler::PreCollide(RE::Actor* a_actor)
 }
 
 
-void CollisionHandler::PostCollide(RE::Actor* a_actor)
+void CollisionHandler::PostCollide([[maybe_unused]] RE::Actor* a_actor)
 {
 	for (auto& collider : _colliders) {
 		collider->PostCollide();
@@ -145,7 +145,7 @@ void CollisionHandler::PostCollide(RE::Actor* a_actor)
 decltype(CollisionHandler::_colliders) CollisionHandler::_colliders;
 
 
-bool DialogueCollider::ShouldIgnoreCollision(RE::Actor* a_actor)
+bool DialogueCollider::ShouldIgnoreCollision([[maybe_unused]] RE::Actor* a_actor)
 {
 	auto menuHandler = Events::MenuOpenCloseHandler::GetSingleton();
 	return menuHandler->IsInDialogue();
@@ -166,9 +166,5 @@ bool AllyCollider::ShouldIgnoreCollision(RE::Actor* a_actor)
 	}
 
 	auto colActor = static_cast<RE::Actor*>(colRef);
-	if (!colActor->IsPlayerTeammate()) {
-		return false;
-	}
-
-	return true;
+	return colActor->IsPlayerTeammate() && !colActor->IsHorse();
 }
