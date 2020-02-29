@@ -37,15 +37,13 @@ extern "C" {
 		a_info->version = WLKN_VERSION_MAJOR;
 
 		if (a_skse->IsEditor()) {
-			_FATALERROR("Loaded in editor, marking as incompatible!\n");
+			_FATALERROR("Loaded in editor, marking as incompatible!");
 			return false;
 		}
 
-		switch (a_skse->RuntimeVersion()) {
-		case RUNTIME_VERSION_1_5_97:
-			break;
-		default:
-			_FATALERROR("Unsupported runtime version %s!\n", a_skse->UnmangledRuntimeVersion().c_str());
+		auto ver = a_skse->RuntimeVersion();
+		if (ver <= SKSE::RUNTIME_1_5_39) {
+			_FATALERROR("Unsupported runtime version %s!", ver.GetString().c_str());
 			return false;
 		}
 

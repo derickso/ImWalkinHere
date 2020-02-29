@@ -62,12 +62,10 @@ void CollisionHandler::Install()
 		return;
 	}
 
-	// E8 ? ? ? ? 48 8B 06 48 8B CE FF 90 ? ? ? ? 8B 86 ? ? ? ?
-	constexpr std::uintptr_t FUNC_ADDR = 0x005D8170;	// 1_5_97
-	REL::Offset<std::uintptr_t> funcBase(FUNC_ADDR);
+	REL::Offset<std::uintptr_t> hookPoint(REL::ID(36359), 0xF0);
 
 	auto trampoline = SKSE::GetTrampoline();
-	_ApplyMovementDelta = trampoline->Write5CallEx(funcBase.GetAddress() + 0xF0, Hook_ApplyMovementDelta);
+	_ApplyMovementDelta = trampoline->Write5CallEx(hookPoint.GetAddress(), Hook_ApplyMovementDelta);
 
 	_MESSAGE("Installed hooks for %s", typeid(CollisionHandler).name());
 }
