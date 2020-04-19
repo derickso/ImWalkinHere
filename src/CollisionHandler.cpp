@@ -164,5 +164,5 @@ bool AllyCollider::ShouldIgnoreCollision(RE::Actor* a_actor)
 	}
 
 	auto colActor = static_cast<RE::Actor*>(colRef);
-	return !colActor->IsHorse() && colActor->IsPlayerTeammate() || colActor->IsCommandedActor();
+	return colActor->IsPlayerTeammate() || colActor->IsCommandedActor() && !colActor->IsHorse();
 }
